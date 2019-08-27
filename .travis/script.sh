@@ -130,7 +130,7 @@ set -u
 if [ -f $FUNC_TEST_SCRIPT ]; then
     $FUNC_TEST_SCRIPT
 else
-    pytest -v -r sx --color=yes --pyargs pulp_rpm.tests.functional || show_logs_and_return_non_zero
+    pytest -v -r sx --color=yes --pyargs pulp_rpm.tests.functional || $CMD_PREFIX bash -c "ls -latr /etc/yum.repos.d/ && cat /etc/yum.repos.d/* && exit 1"
 fi
 
 if [ -f $POST_SCRIPT ]; then
