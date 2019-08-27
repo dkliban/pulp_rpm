@@ -11,12 +11,9 @@ set -v
 
 if [ "$TEST" = 'docs' ]; then
 
-  pip3 install -r pulp_rpm.egg-info/requires.txt
-  pip3 install -r ../pulpcore/doc_requirements.txt
+  pip install -r ../pulpcore/doc_requirements.txt
 
-  pip3 install -r doc_requirements.txt
-  pip3 install -r ../pulpcore/pulpcore.egg-info/requires.txt
-  pip3 install -r ../pulpcore/pulpcore.egg-info/requires.txt[postgres]
+  pip install -r doc_requirements.txt
 fi
 
 pip install -r test_requirements.txt
