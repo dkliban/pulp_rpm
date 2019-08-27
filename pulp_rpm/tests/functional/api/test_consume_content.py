@@ -81,18 +81,13 @@ class PackageManagerConsumeTestCase(unittest.TestCase):
         )
         self.addCleanup(client.delete, distribution['_href'])
 
-        repo_path = gen_yum_config_file(
-            self.cfg,
-            baseurl=urljoin(
-                self.cfg.get_content_host_base_url(),
-                '//' + distribution['base_url']
-            ),
-            name=repo['name'],
-            repositoryid=repo['name']
-        )
-
+        baseurl=urljoin(self.cfg.get_content_host_base_url(), '//' + distribution['base_url'])
         cli_client = cli.Client(self.cfg)
-        self.addCleanup(cli_client.run, ('rm', repo_path), sudo=True)
+        cli_client.run(('dnf', 'config-manager', '--add-repo', baseurl))
+        dnf_repo_id = "24816{base_url}".format(base_url=distribution['base_url'].replace("/", "_"))
+        cli_client.run(('dnf', 'config-manager', '--save', '--setopt=gpgcheck=0', dnf_repo_id))
+        repo_file_path = '/etc/yum.repos.d/{dnf_repo_id}.repo'.format(dnf_repo_id=dnf_repo_id)
+        self.addCleanup(cli_client.run, ('rm', repo_file_path), sudo=True)
         rpm_name = 'walrus'
         self.pkg_mgr.install(rpm_name)
         self.addCleanup(self.pkg_mgr.uninstall, rpm_name)
