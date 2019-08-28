@@ -16,6 +16,7 @@ from pulp_smash.pulp3.utils import (
 )
 
 from pulp_rpm.tests.functional.utils import (
+    gen_yum_config_file,
     gen_rpm_remote,
 )
 from pulp_rpm.tests.functional.constants import (
@@ -84,11 +85,24 @@ class PackageManagerConsumeTestCase(unittest.TestCase):
         baseurl = urljoin(self.cfg.get_content_host_base_url(),
                           '//' + distribution['base_url'])
         cli_client = cli.Client(self.cfg)
-        cli_client.run(('dnf', 'config-manager', '--add-repo', baseurl))
-        repo_id = '*{}'.format(distribution['base_path'])
-        cli_client.run(('dnf', 'config-manager', '--save',
-                        '--setopt=gpgcheck=0', repo_id))
-        self.addCleanup(cli_client.run, ('dnf', 'config-manager', '--disable', repo_id), sudo=True)
+        if self.pkg_mgr.name == "dnf":
+            cli_client.run(('dnf', 'config-manager', '--add-repo', baseurl))
+            repo_id = '*{}'.format(distribution['base_path'])
+            cli_client.run(('dnf', 'config-manager', '--save',
+                            '--setopt=gpgcheck=0', repo_id))
+            self.addCleanup(cli_client.run, ('dnf', 'config-manager', '--disable', repo_id),
+                            sudo=True)
+        else:
+            repo_path = gen_yum_config_file(
+                self.cfg,
+                baseurl=urljoin(
+                    self.cfg.get_content_host_base_url(),
+                    '//' + distribution['base_url']
+                ),
+                name=repo['name'],
+                repositoryid=repo['name']
+            )
+            self.addCleanup(cli_client.run, ('rm', repo_path), sudo=True)
         rpm_name = 'walrus'
         self.pkg_mgr.install(rpm_name)
         self.addCleanup(self.pkg_mgr.uninstall, rpm_name)
