@@ -133,6 +133,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Install
         
         run: .github/workflows/scripts/install.sh
@@ -150,11 +153,6 @@ jobs:
       - name: Install Python client
         
         run: .github/workflows/scripts/install_python_client.sh
-        shell: bash
-
-      - name: Install Ruby client
-        if: ${{ env.TEST == 'bindings' }}
-        run: .github/workflows/scripts/install_ruby_client.sh
         shell: bash
 
       - name: Before Script
